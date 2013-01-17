@@ -22,19 +22,7 @@ Example:
 
 ## Personalization
 
-You'll want to personalize the Trello list names and verb identifiers. The `VERBS` List is defined at the top of the `Mertrellial` class.
-The `Verb` class is where the verbs are translated into Trello lists.
-
-For instance, my default Trello lists are `Planning,Coding,Testing,User Acceptance,Done`. So I use the following verbs to move cards to the specified lists:
-
-```
-developing -> Development,
-coding -> Development,
-testing -> Testing,
-waiting -> User Acceptance,
-finishing -> Done,
-finished -> Done
-```
+You'll want to personalize the `VERBS` Dictionary to match your Trello list names. You can also do this at runtime with the SetVerbs() method.
 
 ## Dependencies
 

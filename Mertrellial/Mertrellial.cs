@@ -14,11 +14,6 @@ namespace Mertrellial
     public class Mertrellial
     {
         /// <summary>
-        /// verbs used to move cards between lists
-        /// </summary>
-        private readonly List<string> VERBS = new List<string> { "developing", "coding", "testing", "waiting", "finishing", "finished" };
-
-        /// <summary>
         /// constructor
         /// </summary>
         /// <param name="RepoPath">filepath of repository directory</param>
@@ -38,6 +33,7 @@ namespace Mertrellial
             }
             catch (Exception) { throw new Exception("Could not connect to Trello.  Perhaps your auth token has expired?"); }
             Comments = new List<Comment>();
+            Parser = new Parser();
         }
 
         /// <summary>
@@ -61,6 +57,11 @@ namespace Mertrellial
         private List<Comment> Comments;
 
         /// <summary>
+        /// responsible for parsing commit messages
+        /// </summary>
+        private Parser Parser;
+
+        /// <summary>
         /// load all commits since specified datetime (if unspecified, since yesterday),
         /// parse their commit messages, push comments up to Trello
         /// </summary>
@@ -74,43 +75,10 @@ namespace Mertrellial
             Commits = Repo.Log().Where(x => x.Timestamp > Since).ToList();            
             foreach (var Commit in Commits)
             {
-                Comments.AddRange(ParseCommitMessage(Commit.CommitMessage));
+                Comments.AddRange(Parser.ParseCommitMessage(Commit.CommitMessage));
             }
             PushComments();
-        }
-
-        /// <summary>
-        /// parse a commit message, following specified syntax
-        /// </summary>
-        /// <param name="CommitMessage">commit message</param>
-        /// <returns>list of comments to push up to Trello</returns>
-        private List<Comment> ParseCommitMessage (string CommitMessage)
-        {
-            var Messages = Regex.Split(CommitMessage, "\r\n|\r|\n");
-            var Comments = new List<Comment>();
-            foreach (var Message in Messages)
-            {
-                try
-                {
-                    var Tokens = Message.Split(' ').ToList();
-                    var Comment = new Comment();
-                    if (VERBS.Contains(Tokens[0].ToLower()))
-                    {
-                        var verb = new Verb(Tokens[0]);
-                        Comment.Verb = verb;
-                        Tokens.RemoveAt(0);
-                    }
-                    int CardIndex = Tokens.FindIndex(x => x.ToLower().Equals("card"));
-                    if (CardIndex < 0) return new List<Comment>();
-                    Comment.BoardName = string.Join(" ", Tokens.GetRange(0, CardIndex));
-                    Comment.CardId = int.Parse(Regex.Replace(Tokens.ElementAt(CardIndex + 1), "[^0-9]+", string.Empty));
-                    Comment.Message = string.Join(" ", Tokens.GetRange(CardIndex + 2, Tokens.Count - CardIndex - 2));
-                    Comments.Add(Comment);
-                }
-                catch (Exception) { Console.WriteLine("Caught poorly formatted message: " + Message); }
-            }
-            return Comments;
-        }
+        }        
         
         /// <summary>
         /// push up all comments to Trello
@@ -139,13 +107,86 @@ namespace Mertrellial
             var Cards = Trello.Cards.ForBoard(Board);
             var Card = Cards.Single(x => x.IdShort.Equals(Comment.CardId));
             Trello.Cards.AddComment(Card, Comment.Message);
-            if (Comment.Verb != null)
+            if (Comment.List != null)
             {
-                var List = Trello.Lists.ForBoard(Board).Single(x => x.Name.Equals(Comment.Verb.List));
+                var List = Trello.Lists.ForBoard(Board).Single(x => x.Name.Equals(Comment.List));
                 Trello.Cards.Move(Card, List);
             }
         }
-    }   
+
+        /// <summary>
+        /// updates VERBS dictionary
+        /// </summary>
+        /// <param name="Verbs">Dictionary with which to update VERBS</param>
+        public void SetVerbs (Dictionary<string,string> Verbs)
+        {
+            Parser.SetVerbs(Verbs);
+        }
+    }
+
+    public class Parser
+    {
+        public Parser () { }
+
+        /// <summary>
+        /// maps verbs to Trello lists for moving cards
+        /// </summary>
+        private Dictionary<string, string> VERBS = new Dictionary<string, string> 
+        { 
+            { "developing", "Development" },
+            { "coding", "Development" },
+            { "testing", "Testing" },
+            { "waiting", "User Acceptance" },
+            { "finishing", "Done" },
+            { "finished", "Done" }
+        };
+
+        /// <summary>
+        /// updates VERBS dictionary
+        /// </summary>
+        /// <param name="Verbs">Dictionary with which to update VERBS</param>
+        public void SetVerbs (Dictionary<string, string> Verbs)
+        {
+            VERBS = Verbs;
+        }
+
+        /// <summary>
+        /// parse a commit message, following specified syntax
+        /// </summary>
+        /// <param name="CommitMessage">commit message</param>
+        /// <returns>list of comments to push up to Trello</returns>
+        public List<Comment> ParseCommitMessage (string CommitMessage)
+        {
+            var Messages = Regex.Split(CommitMessage, "\r\n|\r|\n");
+            var Comments = new List<Comment>();
+            foreach (var Message in Messages)
+            {
+                try
+                {
+                    var Tokens = Message.Split(' ').ToList();
+                    var Comment = new Comment();
+                    var Verb = Tokens[0].ToLower();
+                    if (VERBS.Keys.Contains(Verb))
+                    {
+                        Comment.List = VERBS[Verb];
+                        Tokens.RemoveAt(0);
+                    }
+                    int CardIndex = Tokens.FindIndex(x => x.ToLower().Equals("card"));
+                    if (CardIndex < 0) return new List<Comment>();
+                    Comment.BoardName = string.Join(" ", Tokens.GetRange(0, CardIndex));
+                    if (string.IsNullOrEmpty(Comment.BoardName.Trim()) || Comment.BoardName.Equals("card"))
+                    {
+                        break;
+                    }
+                    Comment.CardId = int.Parse(Regex.Replace(Tokens.ElementAt(CardIndex + 1), "[^0-9]+", string.Empty));
+                    Comment.Message = string.Join(" ", Tokens.GetRange(CardIndex + 2, Tokens.Count - CardIndex - 2)).Trim();
+                    Comments.Add(Comment);
+                }
+                catch (Exception) { Console.WriteLine("Caught poorly formatted message: " + Message); }
+            }
+            return Comments;
+        }
+    }
 
     /// <summary>
     /// wraps comment info from commit messages
@@ -154,14 +195,14 @@ namespace Mertrellial
     {
         public Comment () { }
 
-        public Comment (string Board, int Card, string Message, Verb verb = null)
+        public Comment (string Board, int Card, string Message, string List = null)
         {
             this.BoardName = Board;
             this.CardId = Card;
             this.Message = Message;
-            if (verb != null)
+            if (!string.IsNullOrEmpty(List))
             {
-                this.Verb = verb;
+                this.List = List;
             }
         }
 
@@ -181,38 +222,8 @@ namespace Mertrellial
         public string Message { get; set; }
         
         /// <summary>
-        /// verb specifying Trello List to which to move Card
+        /// Trello list to which to move the card
         /// </summary>
-        public Verb Verb { get; set; }
-    }
-
-    /// <summary>
-    /// translates verbs in commit messages to Trello Lists
-    /// </summary>
-    public class Verb
-    {
-        /// <summary>
-        /// Trello List name
-        /// </summary>
-        public readonly string List;
-
-        public Verb (string verb)
-        {
-            this.List = GetList(verb.ToLower());
-        }
-
-        private string GetList (string verb)
-        {
-            switch (verb.ToLower())
-            {
-                case "developing": return "Development";
-                case "coding": return "Development";
-                case "testing": return "Testing";
-                case "waiting": return "User Acceptance";
-                case "finishing": return "Done";
-                case "finished": return "Done";
-                default: return "";
-            }
-        }
-    }
+        public string List { get; set; }
+    }    
 }
