@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>TrelloNet</id>
+    <version>0.5.7</version>
+    <title>Trello.NET</title>
+    <authors>Oskar Dillén</authors>
+    <owners>Oskar Dillén</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseUrl>
+    <projectUrl>https://github.com/dillenmeister/Trello.NET</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A .NET client library for Trello.</description>
+    <releaseNotes>0.5.7
+      * Add and remove attachments from cards (Trello.Cards.AddAttachment and Trello.Cards.RemoveAttachment)
+      * All actions now have a MemberCreator property
+      * AddMemberToCardAction now have a Member property
+      * New method Trello.Boards.MarkAsViewed
+
+      0.5.6
+      * Update RestSharp from 103.2 to 104.1
+
+      0.5.5
+      * Change visibilty on a board (Trello.Boards.ChangePermissionLevel)
+      * Check/uncheck check item (Trello.Cards.ChangeCheckItemState) and name (Trello.Cards.ChangeCheckItemName)
+      * Card now contains Checklist which contains CheckItem which has a Checked property
+      * Can move card between boards (Cards.Move)</releaseNotes>
+    <copyright>Copyright 2012</copyright>
+    <tags>trello</tags>
+    <dependencies>
+      <dependency id="Newtonsoft.Json" version="[4.5, 4.6)" />
+      <dependency id="RestSharp" version="104.1.0" />
+    </dependencies>
+    <references>
+      <reference file="TrelloNet.dll" />
+    </references>
+  </metadata>
+</package>
