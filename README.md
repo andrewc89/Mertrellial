@@ -6,6 +6,10 @@ Updates Trello cards via Mercurial commit messages.
 
 `new Mertrellial("<repository directory filepath>", "<Trello appy key>", "<Trello auth token>").CheckCommits();`
 
+You can set the `app key` and `auth token` in the constructor as default values so your instantiation is a little more clean. You can also specify a `DateTime` from which to check for commits (the default is within the last hour):
+
+`new Mertrellial("<repo path>").CheckCommits(DateTime.Now.AddHours(-1))`
+
 ## Syntax
 
 `<VERB> <BOARD> card <CARD #> commit message`
@@ -35,4 +39,5 @@ finished -> Done
 ## Dependencies
 
 [Trello.NET](https://github.com/dillenmeister/Trello.NET/)
+
 [Mercurial.NET](https://mercurialnet.codeplex.com/)
