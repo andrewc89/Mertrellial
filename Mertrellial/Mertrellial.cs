@@ -104,8 +104,7 @@ namespace Mertrellial
         /// <param name="Comment">Comment object</param>
         private void PushComment (TrelloNet.Board Board, Comment Comment)
         {
-            var Cards = Trello.Cards.ForBoard(Board);
-            var Card = Cards.Single(x => x.IdShort.Equals(Comment.CardId));
+            var Card = Trello.Cards.WithShortId(Comment.CardId, Board)
             Trello.Cards.AddComment(Card, Comment.Message);
             if (Comment.List != null)
             {
