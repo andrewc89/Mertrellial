@@ -26,12 +26,17 @@ namespace Mertrellial
                 throw new Exception("You need to specify your Trello application key and auth token");
             }
             Repo = new Mercurial.Repository(RepoPath);
+            if (Repo != null)
+            {
+                Console.WriteLine("Found repository at " + Repo.Path);
+            }
             Trello = new TrelloNet.Trello(AppKey);
             try
             {
                 Trello.Authorize(AuthToken);
             }
             catch (Exception) { throw new Exception("Could not connect to Trello.  Perhaps your auth token has expired?"); }
+            Console.WriteLine("Connected to Trello as " + Trello.Members.Me().FullName);
             Comments = new List<Comment>();
             Parser = new Parser();
         }
@@ -72,9 +77,11 @@ namespace Mertrellial
             {
                 Since = DateTime.Now.AddHours(-1);
             }
+            Console.WriteLine("Loading commits committed since " + Since.ToString() + "...");
             Commits = Repo.Log().Where(x => x.Timestamp > Since).ToList();            
             foreach (var Commit in Commits)
             {
+                Console.WriteLine("Found commit from " + Commit.Timestamp.ToString() + " by " + Commit.AuthorName);
                 Comments.AddRange(Parser.ParseCommitMessage(Commit.CommitMessage));
             }
             PushComments();
@@ -106,6 +113,7 @@ namespace Mertrellial
         {
             var Card = Trello.Cards.WithShortId(Comment.CardId, Board);
             Trello.Cards.AddComment(Card, Comment.Message);
+            Console.WriteLine("Added comment to card #" + Card.IdShort + " on the " + Board.Name + " board");
             if (Comment.List != null)
             {
                 var List = Trello.Lists.ForBoard(Board).Single(x => x.Name.Equals(Comment.List));
