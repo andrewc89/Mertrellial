@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Mercurial.Net</id>
     <version>1.1.1.607</version>
@@ -13,8 +13,5 @@
     <description>Mercurial command line client wrapper assembly for .NET 3.5 and 4.0</description>
     <summary>A class library for .NET 3.5 and 4.0 that allows a program to execute the Mercurial DVCS command line client. The class library handles, and in most cases parses, the output and results of executing the command line client executable.</summary>
     <tags>.NET C# Mercurial DVCS</tags>
-    <references>
-      <reference file="Mercurial.Net.dll" />
-    </references>
   </metadata>
 </package>

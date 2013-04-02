@@ -9,20 +9,30 @@ namespace Mertrellial.Tests
     [TestFixture]
     public class ParserTests
     {
-        private readonly Dictionary<string, string> _verbs = new Dictionary<string, string> { { "coding", "Development" }, { "testing", "Testing" } };
-        private readonly List<string> _commitMessages = new List<string> { "Mertrellial card 3: added NUnit test library", 
-                                                                          "testing Mertrellial card 3: added ParseCommitMessage() test" };
-                                                                    
-        private readonly List<Comment> _expectedComments = new List<Comment> 
-        { 
-            new Comment("Mertrellial", 3, "added NUnit test library"), 
-            new Comment("Mertrellial", 3, "added ParseCommitMessage() test", "Testing") 
-        };
+        private readonly Dictionary<string, string> _verbs;
+        private readonly List<string> _commitMessages;
+        private readonly List<Comment> _expectedComments;
+        private Parser parser;
+
+        public ParserTests ()
+        {
+            _verbs = new Dictionary<string, string> { { "coding", "Development" }, { "testing", "Testing" } };
+            _commitMessages = new List<string>
+            {
+                "Mertrellial card 3: added NUnit test library",
+                "testing Mertrellial card 3: added ParseCommitMessage() test"
+            };
+            _expectedComments = new List<Comment>
+            {
+                new Comment("Mertrellial", 3, "added NUnit test library"),
+                new Comment("Mertrellial", 3, "added ParseCommitMessage() test", "Testing")
+            };
+            parser = new Parser();
+        }
 
         [Test]
         public void ParseCommitMessageWithoutVerb ()
         {
-            var parser = new Parser();
             parser.SetVerbs(_verbs);
             var message = _commitMessages[0];
 
@@ -38,7 +48,6 @@ namespace Mertrellial.Tests
         [Test]
         public void ParseCommitMessageWithVerb ()
         {
-            var parser = new Parser();
             parser.SetVerbs(_verbs);
             var message = _commitMessages[1];
 
@@ -54,7 +63,6 @@ namespace Mertrellial.Tests
         [Test]
         public void ParseCommitMessageWithMultipleLines ()
         {
-            var parser = new Parser();
             parser.SetVerbs(_verbs);
 
             var comments = parser.ParseCommitMessage(string.Join(Constants.NewLine, _commitMessages));
@@ -72,9 +80,18 @@ namespace Mertrellial.Tests
         [Test]
         public void CatchMessageWithoutBoard ()
         {
-            var parser = new Parser();
             parser.SetVerbs(_verbs);
-            var message = "coding card 3: testing for poorly formatted commit messages";
+            var message = "testing card 3: testing for poorly formatted commit messages";
+
+            var comments = parser.ParseCommitMessage(message);
+
+            Assert.That(comments.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void CatchMessageWithoutBoardorVerb ()
+        {
+            var message = "card 3: testing for poorly formatted commit messages";
 
             var comments = parser.ParseCommitMessage(message);
 

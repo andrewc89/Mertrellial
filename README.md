@@ -4,7 +4,11 @@ Adds Mercurial commit messages as comments on specified Trello cards
 
 ## Usage
 
-`new Mertrellial("<repository directory filepath>", "<Trello appy key>", "<Trello auth token>").CheckCommits();`
+```
+var mertrellial = new Mertrellial("<repository directory filepath>", "<Trello appy key>", "<Trello auth token>");
+mertrellial.CheckCommits();
+mertrellial.PushComments();
+```
 
 You can set the `app key` and `auth token` in the constructor as default values so your instantiation is a little more clean. You can also specify a `DateTime` from which to check for commits (the default is within the last hour):
 
@@ -22,7 +26,7 @@ Example:
 
 ## Personalization
 
-You'll want to personalize the `VERBS` Dictionary to match your Trello list names. You can also do this at runtime with the SetVerbs() method.
+You'll want to personalize the `VERBS` Dictionary to match your Trello list names. You can do this by editing the code or at runtime with `mertrellial.SetVerbs(myVerbs)`.
 
 ## Dependencies
 
