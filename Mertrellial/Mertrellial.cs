@@ -106,7 +106,7 @@ namespace Mertrellial
             foreach (var Board in Comments.Select(x => x.BoardName).Distinct())
             {
                 var TrelloBoard = Trello.Boards.Search(Board, 1).First();
-                foreach (var Comment in Comments.Where(x => x.BoardName == Board))
+                foreach (var Comment in Comments.Where(x => x.BoardName == Board).OrderBy(x => x.RevNumber))
                 {
                     PushComment(TrelloBoard, Comment);
                 }
