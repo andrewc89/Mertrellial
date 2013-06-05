@@ -18,20 +18,14 @@ namespace Mertrellial
         /// <summary>
         /// constructor
         /// </summary>
-        /// <param name="RepoPath">filepath of repository directory</param>
         /// <param name="AppKey">Trello application key</param>
         /// <param name="AuthToken">Trello authentication token</param>
-        public Mertrellial (string RepoPath, string AppKey = "", string AuthToken = "")
+        public Mertrellial (string AppKey = "", string AuthToken = "")
         {
             if (string.IsNullOrEmpty(AppKey) || string.IsNullOrEmpty(AuthToken))
             {
                 throw new ArgumentException("You need to specify your Trello application key and auth token");                
-            }
-            Repo = new Mercurial.Repository(RepoPath);
-            if (Repo != null)
-            {
-                Console.WriteLine("Found repository at " + Repo.Path);
-            }
+            }            
             Trello = new TrelloNet.Trello(AppKey);
             try
             {
@@ -80,9 +74,22 @@ namespace Mertrellial
         /// load all commits since specified datetime (if unspecified, since yesterday),
         /// parse their commit messages, push comments up to Trello
         /// </summary>
+        /// <param name="RepoPath">directory path for Mercurial repository</param>
         /// <param name="Since">check for commits since when? default = yesterday at same time</param>
-        public void CheckCommits (DateTime? Since = null)
+        public void CheckCommits (string RepoPath, DateTime? Since = null)
         {
+            if (!string.IsNullOrEmpty(RepoPath))
+            {
+                Repo = new Mercurial.Repository(RepoPath);
+                if (Repo != null)
+                {
+                    Console.WriteLine("Found repository at " + Repo.Path);
+                }
+            }
+            else if (Repo == null)            
+            {
+                throw new Exception("You need to provide a path for the Mercurial repository");
+            }
             if (Since == null)
             {
                 Since = DateTime.Now.AddHours(-1);
