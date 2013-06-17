@@ -1,8 +1,5 @@
-﻿
+﻿using System.Collections.Generic;
 using NUnit.Framework;
-using System.Collections.Generic;
-using System.Text;
-using System;
 
 namespace Mertrellial.Tests
 {
@@ -42,7 +39,7 @@ namespace Mertrellial.Tests
             Assert.That(comment.BoardName, Is.EqualTo(expectedComment.BoardName));
             Assert.That(comment.CardId, Is.EqualTo(expectedComment.CardId));
             Assert.That(comment.List, Is.EqualTo(expectedComment.List));
-            Assert.That(comment.Message, Is.EqualTo(expectedComment.Message)); 
+            Assert.That(comment.Message, Is.EqualTo(expectedComment.Message));
         }
 
         [Test]
@@ -57,7 +54,7 @@ namespace Mertrellial.Tests
             Assert.That(comment.BoardName, Is.EqualTo(expectedComment.BoardName));
             Assert.That(comment.CardId, Is.EqualTo(expectedComment.CardId));
             Assert.That(comment.List, Is.EqualTo(expectedComment.List));
-            Assert.That(comment.Message, Is.EqualTo(expectedComment.Message)); 
+            Assert.That(comment.Message, Is.EqualTo(expectedComment.Message));
         }
 
         [Test]

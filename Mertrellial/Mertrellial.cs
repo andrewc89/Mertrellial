@@ -1,12 +1,10 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+
 namespace Mertrellial
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Text.RegularExpressions;
-
     /// <summary>
     /// updates trello cards via mercurial commits
     /// use: new Mertrellial("repo filepath").CheckCommits()
@@ -24,8 +22,8 @@ namespace Mertrellial
         {
             if (string.IsNullOrEmpty(AppKey) || string.IsNullOrEmpty(AuthToken))
             {
-                throw new ArgumentException("You need to specify your Trello application key and auth token");                
-            }            
+                throw new ArgumentException("You need to specify your Trello application key and auth token");
+            }
             Trello = new TrelloNet.Trello(AppKey);
             try
             {
@@ -37,7 +35,7 @@ namespace Mertrellial
             Parser = new Parser();
         }
 
-        #endregion
+        #endregion Constructor
 
         #region Properties
 
@@ -45,17 +43,17 @@ namespace Mertrellial
         /// Mercurial repository
         /// </summary>
         private Mercurial.Repository Repo;
-        
+
         /// <summary>
         /// Trello.NET object
         /// </summary>
         private TrelloNet.Trello Trello;
-        
+
         /// <summary>
         /// recent changesets
         /// </summary>
         public List<Mercurial.Changeset> Commits;
-        
+
         /// <summary>
         /// all commit messages
         /// </summary>
@@ -66,7 +64,7 @@ namespace Mertrellial
         /// </summary>
         private Parser Parser;
 
-        #endregion
+        #endregion Properties
 
         #region Public Functions
 
@@ -86,7 +84,7 @@ namespace Mertrellial
                     Console.WriteLine("Found repository at " + Repo.Path);
                 }
             }
-            else if (Repo == null)            
+            else if (Repo == null)
             {
                 throw new Exception("You need to provide a path for the Mercurial repository");
             }
@@ -95,11 +93,11 @@ namespace Mertrellial
                 Since = DateTime.Now.AddHours(-1);
             }
             Console.WriteLine("Loading commits committed since " + Since.ToString() + "...");
-            Commits = Repo.Log(new Mercurial.LogCommand().WithTimeout(120)).Where(x => x.Timestamp > Since).ToList();       
+            Commits = Repo.Log(new Mercurial.LogCommand().WithTimeout(120)).Where(x => x.Timestamp > Since).ToList();
             foreach (var Commit in Commits)
             {
                 Console.WriteLine("Found commit from " + Commit.Timestamp.ToString() + " by " + Commit.AuthorName);
-                
+
                 Comments.AddRange(ConstructComments(Commit));
             }
         }
@@ -129,7 +127,7 @@ namespace Mertrellial
             Parser.SetVerbs(Verbs);
         }
 
-        #endregion
+        #endregion Public Functions
 
         #region Private Functions
 
@@ -142,7 +140,7 @@ namespace Mertrellial
                 Comment.RevNumber = Commit.RevisionNumber;
             }
             return Comments;
-        }       
+        }
 
         /// <summary>
         /// add a single comment to a card on the specified Board
@@ -161,18 +159,29 @@ namespace Mertrellial
             }
         }
 
-        #endregion
+        #endregion Private Functions
     }
 
+    /// <summary>
+    /// parses commit message for Trello comments
+    /// </summary>
     public class Parser
     {
-        public Parser () { }
+        #region Constructor
+
+        public Parser ()
+        {
+        }
+
+        #endregion Constructor
+
+        #region Properties
 
         /// <summary>
         /// maps verbs to Trello lists for moving cards
         /// </summary>
-        private Dictionary<string, string> VERBS = new Dictionary<string, string> 
-        { 
+        private Dictionary<string, string> VERBS = new Dictionary<string, string>
+        {
             { "developing", "Development" },
             { "coding", "Development" },
             { "testing", "Testing" },
@@ -180,6 +189,10 @@ namespace Mertrellial
             { "finishing", "Done" },
             { "finished", "Done" }
         };
+
+        #endregion Properties
+
+        #region SetVerbs
 
         /// <summary>
         /// updates VERBS dictionary
@@ -189,6 +202,10 @@ namespace Mertrellial
         {
             VERBS = Verbs;
         }
+
+        #endregion SetVerbs
+
+        #region ParseCommitMessage
 
         /// <summary>
         /// parse a commit message, following specified syntax
@@ -220,13 +237,15 @@ namespace Mertrellial
                     }
                     Comment.CardId = int.Parse(Regex.Replace(Tokens.ElementAt(CardIndex + 1), "[^0-9]+", string.Empty));
                     Comment.Message = string.Join(" ", Tokens.GetRange(CardIndex + 2, Tokens.Count - CardIndex - 2)).Trim();
-                    
+
                     Comments.Add(Comment);
                 }
                 catch (Exception) { Console.WriteLine("Caught poorly formatted message: " + Message); }
             }
             return Comments;
         }
+
+        #endregion ParseCommitMessage
     }
 
     /// <summary>
@@ -234,7 +253,11 @@ namespace Mertrellial
     /// </summary>
     public class Comment
     {
-        public Comment () { }
+        #region Constructors
+
+        public Comment ()
+        {
+        }
 
         public Comment (string Board, int Card, string Message, string List = null)
         {
@@ -246,6 +269,10 @@ namespace Mertrellial
                 this.List = List;
             }
         }
+
+        #endregion Constructors
+
+        #region Properties
 
         /// <summary>
         /// commit author
@@ -261,21 +288,25 @@ namespace Mertrellial
         /// Trello Board name
         /// </summary>
         public string BoardName { get; set; }
-        
+
         /// <summary>
         /// Card id
         /// </summary>
         public int CardId { get; set; }
-        
+
         /// <summary>
         /// commit message (to be comment on specified card)
         /// </summary>
         public string Message { get; set; }
-        
+
         /// <summary>
         /// Trello list to which to move the card
         /// </summary>
         public string List { get; set; }
+
+        #endregion Properties
+
+        #region ToString
 
         /// <summary>
         /// ToString override, used for formatting of comment on card
@@ -285,5 +316,7 @@ namespace Mertrellial
         {
             return RevNumber + ":" + Author + " - " + Message;
         }
-    }    
+
+        #endregion ToString
+    }
 }

@@ -1,5 +1,4 @@
-﻿
-namespace Mertrellial.Tests
+﻿namespace Mertrellial.Tests
 {
     /// <summary>
     /// TODO: Update summary.
