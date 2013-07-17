@@ -48,8 +48,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="TrelloNet">
-      <HintPath>..\packages\TrelloNet.0.5.6\lib\net40-Client\TrelloNet.dll</HintPath>
+    <Reference Include="TrelloNet, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\TrelloNet.0.5.9\lib\net40-Client\TrelloNet.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

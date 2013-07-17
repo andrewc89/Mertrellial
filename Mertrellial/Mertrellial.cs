@@ -18,7 +18,7 @@ namespace Mertrellial
         /// </summary>
         /// <param name="AppKey">Trello application key</param>
         /// <param name="AuthToken">Trello authentication token</param>
-        public Mertrellial (string AppKey = "", string AuthToken = "")
+        public Mertrellial (string AppKey, string AuthToken)
         {
             if (string.IsNullOrEmpty(AppKey) || string.IsNullOrEmpty(AuthToken))
             {
@@ -93,7 +93,7 @@ namespace Mertrellial
                 Since = DateTime.Now.AddHours(-1);
             }
             Console.WriteLine("Loading commits committed since " + Since.ToString() + "...");
-            Commits = Repo.Log(new Mercurial.LogCommand().WithTimeout(120)).Where(x => x.Timestamp > Since).ToList();
+            Commits = Repo.Log(new Mercurial.LogCommand().WithTimeout(240)).Where(x => x.Timestamp > Since).ToList();
             foreach (var Commit in Commits)
             {
                 Console.WriteLine("Found commit from " + Commit.Timestamp.ToString() + " by " + Commit.AuthorName);
