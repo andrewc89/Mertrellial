@@ -93,7 +93,7 @@ namespace Mertrellial
                 Since = DateTime.Now.AddHours(-1);
             }
             Console.WriteLine("Loading commits committed since " + Since.ToString() + "...");
-            Commits = Repo.Log(new Mercurial.LogCommand().WithTimeout(240)).Where(x => x.Timestamp > Since).ToList();
+            Commits = Repo.Log(new Mercurial.LogCommand().WithTimeout(1200)).Where(x => x.Timestamp > Since).ToList();
             foreach (var Commit in Commits)
             {
                 Console.WriteLine("Found commit from " + Commit.Timestamp.ToString() + " by " + Commit.AuthorName);
